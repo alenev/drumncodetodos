@@ -17,17 +17,4 @@ class ToDos extends Model
         'priority',
         'title'
     ];
-
-    public static function add($fields):bool|object
-    {
-
-        $city = new static;
-        $city->fill($fields);
-        $city->save();
-
-     }
-
-     return $city;
-
-}
 }
