@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('todos', function (Blueprint $table) {
             $table->id();
             $table->integer('id_user');
-            $table->integer('id_parent_todo');
-            $table->integer('id_status');
-            $table->integer('priority');
+            $table->integer('id_parent_todo')->default(0);
+            $table->integer('id_status')->default(1);
+            $table->integer('priority')->default(1);
             $table->string('title');
             $table->string('description');  
             $table->timestamp('completed_at')->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('todos');
     }
 };

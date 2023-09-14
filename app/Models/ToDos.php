@@ -12,7 +12,7 @@ class ToDos extends Model
     protected $table = 'todos';
     protected $fillable = [
         'id_user',
-        'id_paarent_todo',
+        'id_parent_todo',
         'id_status',
         'priority',
         'title'

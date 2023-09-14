@@ -11,10 +11,23 @@ class ToDoCreateRequest extends FormRequest
      *
      * @return bool
      */
+
+     public function validationData()
+     {
+        if(str_contains($this->header('Content-Type'), 'text/plain')){
+          return $this->json()->all();
+        }else{
+            return $this->all();
+        }
+    
+     }
+
     public function authorize()
     {
         return true;
     }
+ 
+
 
     /**
      * Get the validation rules that apply to the request.
@@ -24,11 +37,11 @@ class ToDoCreateRequest extends FormRequest
     public function rules()
     {
         return [
-            'test' => 'required|int',
-            // 'product_name' => 'required|string|min:3',
-            // 'weigth' => 'decimal',
-            // 'description' => 'string',
-            // 'total_price' => 'required|decimal:2'
+            'id_user' => 'required|int',
+            'id_parent_todo' => 'required|int',
+            'id_status' => 'required|int',
+            'priority' => 'required|int|between:1,5', 
+            'title' => 'required|string|min:1'
         ];
     }
 
