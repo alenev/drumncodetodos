@@ -20,8 +20,8 @@ class TodosFactory extends Factory
         return [
             'id_user' => fake()->numberBetween(1,2),
             'id_parent_todo' => 0,
-            'id_status' => 1,
-            'priority' => 1,
+            'id_status' => fake()->numberBetween(1,2),
+            'priority' => fake()->numberBetween(1,5),
             'title' => fake()->sentence(4),
             'description' => fake()->sentence(8)
         ];

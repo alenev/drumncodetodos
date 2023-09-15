@@ -3,17 +3,52 @@
 namespace App\Repositories;
 
 use App\Models\ToDos;
-use App\Repositories\Interfaces\ToDosRepositoryInterface;
+use App\Repositories\API\Interfaces\ToDosRepositoryInterface;
+
+
 class ToDosRepository implements ToDosRepositoryInterface
 {
+    private int $perPage;
+    private object $search;
+
     public function all()
     {
       return ToDos::get()->all();
 
     } 
-    public function getPaginated(int $perPage)
+    public function getPaginated(array $params)
     {
-        return ToDos::paginate($perPage);
+  
+       if(!empty($params["per_page"])){
+          $this->perPage = $params["per_page"];
+       }else if(!empty(env('TODOS_PER_PAGE'))){
+          $this->perPage = env('TODOS_PER_PAGE');
+       }else{
+          $this->perPage = 10;
+       }
+
+       $this->search = ToDos::query();
+
+       $this->search->where('id_user', $params["id_user"]);
+
+       if(!empty($params["search_keywords"])){
+        $this->search
+        ->whereFullText(['title', 'description'], ''.$params["search_keywords".''], ['mode' == 'boolean']);
+      }
+
+       if(!empty($params["priority"])){
+        $params["priority"] = explode(",",$params["priority"]);
+        $this->search->whereBetween('priority', [$params['priority'][0], $params['priority'][1]]);
+       }
+
+       if(!empty($params['id_status'] && $params['id_status'] > 0)){
+        $this->search->where('id_status', '=', $params['id_status']);
+       }
+
+      return $this->search
+      ->orderBy('id')
+      ->paginate($this->perPage);
+
     }
     public function create(array $data)
     {

@@ -3,8 +3,9 @@
 namespace App\Http\Requests\API\ToDos;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class ToDoCreateRequest extends FormRequest
+class ToDosGetRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -38,10 +39,9 @@ class ToDoCreateRequest extends FormRequest
     {
         return [
             'id_user' => 'required|int|exists:users,id',
-            'id_parent_todo' => 'required|int',
-            'id_status' => 'required|int|in:1|exists:todos_statuses,id',
-            'priority' => 'required|int|between:1,5', 
-            'title' => 'required|string|min:1'
+            'id_parent_todo' => 'int',
+            'id_status' => 'int',
+            'priority' => 'string|regex:/[,]+/'
         ];
     }
 

@@ -12,6 +12,6 @@ class ToDosSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\ToDos::factory(8)->create();
+        \App\Models\ToDos::factory(40)->create();
     }
 }

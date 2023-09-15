@@ -15,6 +15,9 @@ class ToDos extends Model
         'id_parent_todo',
         'id_status',
         'priority',
-        'title'
+        'title',
+        'description',
+        'completed_at'
     ];
+
 }
