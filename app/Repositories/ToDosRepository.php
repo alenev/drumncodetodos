@@ -56,7 +56,10 @@ class ToDosRepository implements ToDosRepositoryInterface
     }
     public function update(array $data, $id) 
     {
-        return ToDos::where('id', $id)->update($data);
+        $update = ToDos::where('id', $id)->update($data);
+        if($update){
+          return $this->find($id);
+        }
     }
     public function delete($id) {
         return ToDos::destroy($id);

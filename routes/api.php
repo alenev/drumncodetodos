@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('todos/statuses/get', '\App\Http\Controllers\Api\ToDosStatusesController@getToDosStatuses');
 Route::post('todos/create', '\App\Http\Controllers\Api\ToDosController@createToDo');
 Route::get('todos/get', '\App\Http\Controllers\Api\ToDosController@getToDos');
-Route::get('todos/statuses/get', '\App\Http\Controllers\Api\ToDosStatusesController@getToDosStatuses');
+Route::post('todos/update', '\App\Http\Controllers\Api\ToDosController@updateToDo');

@@ -31,6 +31,9 @@ class ToDosHelper {
 
     public static function checkExistParentTodo($request, $db){
         $requestData = self::getRequestData($request);
+        if(intval($requestData['id_parent_todo']) == 0){
+            return true;
+        }
         $parentTodo = $db->find($requestData['id_parent_todo'])->first();
         if(!empty($requestData['id_parent_todo']) && 
         empty($parentTodo)) {
@@ -42,6 +45,15 @@ class ToDosHelper {
             return false;
           }
           return true;
+    }
+
+    public static function checkTodoOwner($request, $db){
+        $requestData = self::getRequestData($request);
+        $todo = $db->find($requestData['id'])->first();
+        if(intval($todo["id_user"]) != intval($requestData['id_user'])){
+            return false;
+        }
+        return true;
     }
     
 }

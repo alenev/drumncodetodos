@@ -9,7 +9,7 @@ use App\Repositories\ToDosRepository;
 use App\Helpers\API\ToDosHelper;
 use App\Http\Requests\API\ToDos\ToDoCreateRequest;
 use App\Http\Requests\API\ToDos\ToDosGetRequest;
-
+use App\Http\Requests\API\ToDos\ToDoUpdateRequest;
 
 class ToDosController extends Controller
 {
@@ -31,7 +31,7 @@ class ToDosController extends Controller
          }else{
             $this->requestData = ToDosHelper::getRequestData($request);        
             if(!ToDosHelper::checkExistParentTodo($request, $this->db)) {
-              return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owne
+              return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owner
             }
 
             $this->todo = $this->db->create($this->requestData);
@@ -63,6 +63,34 @@ class ToDosController extends Controller
                 ], 200);  
             }
          }
+    }
+
+    public function updateToDo(ToDoUpdateRequest $request):JsonResponse
+    {
+        $this->requestValidateError = ToDosHelper::requestValidationErrorsData($request);
+
+        if ($this->requestValidateError) { 
+            return Controller::ApiResponceError($this->requestValidateError, 500); // no valid input data
+         }else{
+            $this->requestData = ToDosHelper::getRequestData($request);  
+
+            if(!ToDosHelper::checkExistParentTodo($request, $this->db)) {
+              return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owner
+            } 
+            if(!ToDosHelper::checkTodoOwner($request, $this->db)){
+              return Controller::ApiResponceError('another owner of todo', 423); // another owner of todo 
+            }
+
+            $this->todo = $this->db->update($this->requestData, $this->requestData["id"]);
+            if(!empty($this->todo)){
+                return Controller::ApiResponceSuccess([
+                    "message" => "todo updated",
+                    "data" => $this->todo
+                ], 200);  
+            }else{
+                return Controller::ApiResponceError('updating todo problem', 500); 
+            }
+        }
     }
 
     public function showToDo($id)
