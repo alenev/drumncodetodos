@@ -31,15 +31,17 @@ class ToDosController extends Controller
          }else{
             $this->requestData = ToDosHelper::getRequestData($request);        
             if(!ToDosHelper::checkExistParentTodo($request, $this->db)) {
-            return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owne
+              return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owne
             }
 
             $this->todo = $this->db->create($this->requestData);
-            if($this->todo){
+            if(!empty($this->todo)){
                 return Controller::ApiResponceSuccess([
-                    "message" => "ToDo created",
+                    "message" => "todo created",
                     "data" => $this->todo
                 ], 200);  
+            }else{
+                return Controller::ApiResponceError('creating todo problem', 500); 
             }
          }
     }

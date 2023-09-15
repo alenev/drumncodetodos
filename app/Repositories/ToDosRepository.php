@@ -31,18 +31,18 @@ class ToDosRepository implements ToDosRepositoryInterface
 
        $this->search->where('id_user', $params["id_user"]);
 
-       if(!empty($params["search_keywords"])){
+       if(array_key_exists('search_keywords', $params) && !empty($params["search_keywords"])){
         $this->search
         ->whereFullText(['title', 'description'], ''.$params["search_keywords".''], ['mode' == 'boolean']);
       }
 
-       if(!empty($params["priority"])){
+       if(array_key_exists('priority', $params) && !empty($params["priority"])){
         $params["priority"] = explode(",",$params["priority"]);
-        $this->search->whereBetween('priority', [$params['priority'][0], $params['priority'][1]]);
+        $this->search->whereBetween('priority', [$params["priority"][0], $params["priority"][1]]);
        }
 
-       if(!empty($params['id_status'] && $params['id_status'] > 0)){
-        $this->search->where('id_status', '=', $params['id_status']);
+       if(array_key_exists('id_status', $params) && !empty($params["id_status"]) && $params["id_status"] > 0){
+         $this->search->where('id_status', '=', $params['id_status']);
        }
 
       return $this->search

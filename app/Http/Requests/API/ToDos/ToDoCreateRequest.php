@@ -39,7 +39,7 @@ class ToDoCreateRequest extends FormRequest
         return [
             'id_user' => 'required|int|exists:users,id',
             'id_parent_todo' => 'required|int',
-            'id_status' => 'required|int|in:1|exists:todos_statuses,id',
+            'id_status' => 'required|int|exists:todos_statuses,id',
             'priority' => 'required|int|between:1,5', 
             'title' => 'required|string|min:1'
         ];

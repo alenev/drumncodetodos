@@ -14,4 +14,10 @@ class ToDosStatuses extends Model
     protected $fillable = [
         'name'
     ];
+
+    public function getAll()
+    {
+      return $this->get()->all();
+
+    } 
 }
