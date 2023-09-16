@@ -4,7 +4,9 @@ namespace App\Repositories;
 
 use App\Models\ToDos;
 use App\Repositories\API\Interfaces\ToDosRepositoryInterface;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ToDosRepository implements ToDosRepositoryInterface
 {
@@ -67,4 +69,12 @@ class ToDosRepository implements ToDosRepositoryInterface
     public function find($id){
         return ToDos::where('id', $id)->get();
     }
+
+    public function getChilds($id)
+    {
+        $toDos = new ToDos;
+        return $toDos->childs($id);
+    }
+
+    
 }

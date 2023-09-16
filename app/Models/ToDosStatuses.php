@@ -18,6 +18,9 @@ class ToDosStatuses extends Model
     public function getAll()
     {
       return $this->get()->all();
-
     } 
+
+    public function find($id){
+      return $this->find($id)->first();
+    }
 }

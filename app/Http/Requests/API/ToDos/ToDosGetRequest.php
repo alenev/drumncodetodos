@@ -41,7 +41,8 @@ class ToDosGetRequest extends FormRequest
             'id_user' => 'required|int|exists:users,id',
             'id_parent_todo' => 'int',
             'id_status' => 'int',
-            'priority' => 'string|regex:/[,]+/'
+            'priority' => 'string|regex:/[,]+/',
+            'child_todos' => 'int'
         ];
     }
 

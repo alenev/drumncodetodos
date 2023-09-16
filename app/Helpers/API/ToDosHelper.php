@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Helpers\API;
-
+use App\Models\ToDosStatuses;
 class ToDosHelper {
 
     public static function requestValidationErrorsData($request)
@@ -54,6 +54,17 @@ class ToDosHelper {
             return false;
         }
         return true;
+    }
+
+    public static function getStatusName($request, $db){
+        $requestData = self::getRequestData($request);
+        $toDosStatuses = new ToDosStatuses;
+        $status = $toDosStatuses->find($requestData["id_status"])->first();
+        if($status){
+           return $status["name"];
+        }else{
+            return false;
+        }
     }
     
 }

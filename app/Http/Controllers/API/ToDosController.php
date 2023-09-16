@@ -55,6 +55,17 @@ class ToDosController extends Controller
             return Controller::ApiResponceError($this->requestValidateError, 500); 
          }else{
             $this->requestData = ToDosHelper::getRequestData($request);
+            if(array_key_exists('child_todos', $this->requestData) && $this->requestData["child_todos"] > 0){
+                $this->todos = $this->db->getChilds($this->requestData["child_todos"]);
+                if($this->todos){
+                    return Controller::ApiResponceSuccess([
+                        "message" => "child todos",
+                        "data" => $this->todos
+                    ], 200);  
+                }else{
+                    return Controller::ApiResponceError('child todos selection problem', 500); 
+                }
+             }
             $this->todos = $this->db->getPaginated($this->requestData);
             if($this->todos){
                 return Controller::ApiResponceSuccess([
@@ -74,6 +85,18 @@ class ToDosController extends Controller
          }else{
             $this->requestData = ToDosHelper::getRequestData($request);  
 
+            if(intval($this->requestData["id_status"]) != 0){
+                $statusName = ToDosHelper::getStatusName($request, $this->db);
+                if($statusName == 'done'){
+                $childTodos = $this->db->getAllchildTodos($this->requestData["id_parent_todo"]); 
+                return Controller::ApiResponceSuccess([
+                    "message" => "todo updated",
+                    "data" => $childTodos
+                ], 200); 
+              //  return Controller::ApiResponceError('update todo status is blocked', 424); // update todo status is blocked
+                }
+            }
+
             if(!ToDosHelper::checkExistParentTodo($request, $this->db)) {
               return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owner
             } 
@@ -91,11 +114,6 @@ class ToDosController extends Controller
                 return Controller::ApiResponceError('updating todo problem', 500); 
             }
         }
-    }
-
-    public function showToDo($id)
-    {
-        $this->todo = $this->db->find($id)->first();
     }
 
 }
