@@ -127,5 +127,49 @@ class ToDosHelper
         return $ToDosHelper->childsData;
     }
 
+    public static function ChildTreeInsert($tree, $child){    
+
+        foreach($tree as $key => &$node){
+            $insertNode = false;
+            if(intval($node["id"]) == intval($child["id_parent_todo"])){
+                $node["childs"][] = $child; 
+                return $tree;
+            }
+            if(isset($node["childs"]) && is_array($node["childs"]) && !empty($node["childs"])){
+               $ToDosHelper = new ToDosHelper();
+               $sub = $ToDosHelper->ChildTreeInsert($node["childs"], $child);
+               if($sub){
+                $node["childs"] = $sub;
+                return $tree;
+               }
+            }
+        }
+    }
+
+    public static function buildParentChildTree(array $dataset)
+    {
+
+    $ToDosHelper = new ToDosHelper();
+    $tree = [];
+  
+        foreach ($dataset as $key => $node) {   
+
+            $node['childs'] = [];
+    
+            if (empty($node['id_parent_todo']) || intval($node['id_parent_todo']) < 1) {
+    
+                $tree[$node['id']] = $node;
+    
+            } else {
+               
+                $tree = $ToDosHelper->ChildTreeInsert($tree, $node);
+
+            }
+    
+        }
+    
+     return $tree;
+    
+    }  
 
 }

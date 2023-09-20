@@ -39,6 +39,9 @@ class ToDosRepository implements ToDosRepositoryInterface
     }
 
     $dbToDos = $this->search->orderBy('id')->get();
+    $ToDosHelper = new ToDosHelper;
+    $childs = ToDosHelper::buildParentChildTree($dbToDos->toArray(), $ToDosHelper);
+    return $childs;
 
     $result = [];
     $exclude = [];
