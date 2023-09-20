@@ -39,48 +39,12 @@ class ToDosRepository implements ToDosRepositoryInterface
     }
 
     $dbToDos = $this->search->orderBy('id')->get();
-    $ToDosHelper = new ToDosHelper;
-    $childs = ToDosHelper::buildParentChildTree($dbToDos->toArray(), $ToDosHelper);
-    return $childs;
+    //return $dbToDos;
+    $childsTree = ToDosHelper::buildParentChildTree($dbToDos->toArray());
+    return $childsTree;
 
-    $result = [];
-    $exclude = [];
-    foreach ($dbToDos as $todo) {
-      if (array_search($todo["id"], $exclude) === false) {
-        $newExclude = [];
-        $newChilds = [];
-        $existChilds = [];
-        if ($todo["id_parent_todo"] > 0) {
-          $childs = $this->getChilds($todo["id"])->toArray();
-          $parentKey = array_search($todo["id_parent_todo"], array_column($result, 'id'));
-          if (!empty($childs)) {
-            $childsData = ToDosHelper::toDosChilds($childs, $todo);
-            $newExclude = $childsData["exclude"];
-            $newChilds = $childsData["data"];
-
-          } else {
-            $newExclude[] = $todo["id"];
-            $newChilds[] = $todo;
-          }
-
-          $exclude = array_merge($exclude, $newExclude);
-          if (empty($result[$parentKey]["childs"])) {
-            $result[$parentKey]["childs"] = $newChilds;
-          } else {
-            $existChilds[] = $result[$parentKey]["childs"];
-            $newChilds = array_merge($existChilds, $newChilds);
-            $result[$parentKey]["childs"] = $newChilds;
-          }
-
-        } else {
-          $todo["childs"] = [];
-          $result[] = $todo;
-        }
-
-      }
-    }
-    return $result;
   }
+
   public function create(array $data)
   {
     return ToDos::create($data);

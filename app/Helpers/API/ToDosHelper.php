@@ -80,96 +80,44 @@ class ToDosHelper
         }
     }
 
-
-    public static function toDosProcesssChild($child)
+    public static function ChildTreeInsert($tree, $child)
     {
-        if (isset($child["descendants"])) {
-            $descendants = $child["descendants"];
-            unset($child["descendants"]);
-            $child["childs"] = $descendants;
-        }
-        return $child;
-    }
-
-
-    public static function modifyChildsRecursive($array, $ToDosHelper)
-    {
-
-        if (!is_array($array))
-            return;
-        $data = [];
-
-        foreach ($array as $key => $value) {
-            if (isset($value["descendants"])) {
-                $value = $ToDosHelper->toDosProcesssChild($value);
-            }
-            if (isset($value["childs"]) && !empty($value["childs"])) {
-                $value["childs"] = $ToDosHelper->modifyChildsRecursive($value["childs"], $ToDosHelper);
-                $data[$key] = $value;
-            } else {
-                $data[$key] = $value;
-
-            }
-            if (array_search($value["id"], $ToDosHelper->childsData["exclude"]) === false) {
-                $ToDosHelper->childsData["exclude"][] = $value["id"];
-            }
-        }
-        return $data;
-    }
-
-    public static function toDosChilds($childs, $parent)
-    {
-        $ToDosHelper = new ToDosHelper;
-        $ToDosHelper->childsData = [];
-        $ToDosHelper->childsData["exclude"] = [];
-        $ToDosHelper->childsData["data"] = $parent;
-        $ToDosHelper->childsData["data"]["childs"] = $ToDosHelper->modifyChildsRecursive($childs, $ToDosHelper);
-        return $ToDosHelper->childsData;
-    }
-
-    public static function ChildTreeInsert($tree, $child){    
-
-        foreach($tree as $key => &$node){
+        $insert = false;
+        foreach ($tree as $key => &$node) {
             $insertNode = false;
-            if(intval($node["id"]) == intval($child["id_parent_todo"])){
-                $node["childs"][] = $child; 
+            if (intval($node["id"]) == intval($child["id_parent_todo"])) {
+                $node["childs"][] = $child;
+                $insert = true;
                 return $tree;
             }
-            if(isset($node["childs"]) && is_array($node["childs"]) && !empty($node["childs"])){
-               $ToDosHelper = new ToDosHelper();
-               $sub = $ToDosHelper->ChildTreeInsert($node["childs"], $child);
-               if($sub){
-                $node["childs"] = $sub;
-                return $tree;
-               }
+            if (isset($node["childs"]) && is_array($node["childs"]) && !empty($node["childs"])) {
+                $ToDosHelper = new ToDosHelper();
+                $sub = $ToDosHelper->ChildTreeInsert($node["childs"], $child);
+                if ($sub) {
+                    $node["childs"] = $sub;
+                    return $tree;
+                }
             }
+        }
+        if(!$insert){
+            $tree[] = $child;
+            return $tree;
         }
     }
 
     public static function buildParentChildTree(array $dataset)
     {
-
-    $ToDosHelper = new ToDosHelper();
-    $tree = [];
-  
-        foreach ($dataset as $key => $node) {   
-
+        $ToDosHelper = new ToDosHelper;
+        $tree = [];
+        foreach ($dataset as $key => $node) {
             $node['childs'] = [];
-    
             if (empty($node['id_parent_todo']) || intval($node['id_parent_todo']) < 1) {
-    
-                $tree[$node['id']] = $node;
-    
+                $tree[] = $node;    
             } else {
-               
                 $tree = $ToDosHelper->ChildTreeInsert($tree, $node);
-
             }
-    
         }
+        return $tree;
+    }
     
-     return $tree;
-    
-    }  
-
 }
