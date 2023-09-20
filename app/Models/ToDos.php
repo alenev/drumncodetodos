@@ -41,7 +41,6 @@ class ToDos extends Model
     {
         $todo = ToDos::find($id);
         if($todo){
-        $childs = $todo->children;
         return $todo->descendants;
         }else{
             return 0;

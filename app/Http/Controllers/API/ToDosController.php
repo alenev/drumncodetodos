@@ -18,100 +18,103 @@ class ToDosController extends Controller
     private $todos;
     private $requestData;
 
-    public function __construct(ToDosRepository $db){
+    public function __construct(ToDosRepository $db)
+    {
         $this->db = $db;
-   }
+    }
 
-    public function createToDo(ToDoCreateRequest $request):JsonResponse 
+    public function createToDo(ToDoCreateRequest $request): JsonResponse
     {
         $this->requestValidateError = ToDosHelper::requestValidationErrorsData($request);
 
-        if ($this->requestValidateError) { 
+        if ($this->requestValidateError) {
             return Controller::ApiResponceError($this->requestValidateError, 500); // no valid input data
-         }else{
-            $this->requestData = ToDosHelper::getRequestData($request);        
-            if(!ToDosHelper::checkExistParentTodo($request, $this->db)) {
-              return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owner
+        } else {
+            $this->requestData = ToDosHelper::getRequestData($request);
+            if (!ToDosHelper::checkExistParentTodo($request, $this->db)) {
+                return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owner
             }
 
             $this->todo = $this->db->create($this->requestData);
-            if(!empty($this->todo)){
+            if (!empty($this->todo)) {
                 return Controller::ApiResponceSuccess([
                     "message" => "todo created",
                     "data" => $this->todo
-                ], 200);  
-            }else{
-                return Controller::ApiResponceError('creating todo problem', 500); 
+                ], 200);
+            } else {
+                return Controller::ApiResponceError('creating todo problem', 500);
             }
-         }
+        }
     }
 
-    public function getToDos(ToDosGetRequest $request):JsonResponse
+    public function getToDos(ToDosGetRequest $request): JsonResponse
     {
 
         $this->requestValidateError = ToDosHelper::requestValidationErrorsData($request);
 
-        if ($this->requestValidateError) { 
-            return Controller::ApiResponceError($this->requestValidateError, 500); 
-         }else{
+        if ($this->requestValidateError) {
+            return Controller::ApiResponceError($this->requestValidateError, 500);
+        } else {
             $this->requestData = ToDosHelper::getRequestData($request);
-            if(array_key_exists('child_todos', $this->requestData) && $this->requestData["child_todos"] > 0){
+            if (array_key_exists('child_todos', $this->requestData) && $this->requestData["child_todos"] > 0) {
                 $this->todos = $this->db->getChilds($this->requestData["child_todos"]);
-                if($this->todos){
+                if ($this->todos) {
                     return Controller::ApiResponceSuccess([
                         "message" => "child todos",
                         "data" => $this->todos
-                    ], 200);  
-                }else{
-                    return Controller::ApiResponceError('child todos selection problem', 500); 
+                    ], 200);
+                } else {
+                    return Controller::ApiResponceError('child todos selection problem', 500);
                 }
-             }
-            $this->todos = $this->db->getPaginated($this->requestData);
-            if($this->todos){
-                return Controller::ApiResponceSuccess([
-                    "message" => "ToDos selected",
-                    "data" => $this->todos
-                ], 200);  
             }
-         }
+
+            $this->todos = $this->db->getAll($this->requestData);
+
+
+            return Controller::ApiResponceSuccess([
+                "message" => "ToDos selected",
+                "data" => $this->todos
+            ], 200);
+
+        }
     }
 
-    public function updateToDo(ToDoUpdateRequest $request):JsonResponse
+    public function updateToDo(ToDoUpdateRequest $request): JsonResponse
     {
         $this->requestValidateError = ToDosHelper::requestValidationErrorsData($request);
 
-        if ($this->requestValidateError) { 
+        if ($this->requestValidateError) {
             return Controller::ApiResponceError($this->requestValidateError, 500); // no valid input data
-         }else{
-            $this->requestData = ToDosHelper::getRequestData($request);  
+        } else {
+            $this->requestData = ToDosHelper::getRequestData($request);
 
-            if(intval($this->requestData["id_status"]) != 0){
+            if (intval($this->requestData["id_status"]) != 0) {
                 $statusName = ToDosHelper::getStatusName($request, $this->db);
-                if($statusName == 'done'){
-                $childTodos = $this->db->getAllchildTodos($this->requestData["id_parent_todo"]); 
-                return Controller::ApiResponceSuccess([
-                    "message" => "todo updated",
-                    "data" => $childTodos
-                ], 200); 
-              //  return Controller::ApiResponceError('update todo status is blocked', 424); // update todo status is blocked
+                if ($statusName == 'done') {
+                    $childTodos = $this->db->getAllchildTodos($this->requestData["id_parent_todo"]);
+                    return Controller::ApiResponceSuccess([
+                        "message" => "todo updated",
+                        "data" => $childTodos
+                    ], 200);
+                    //  return Controller::ApiResponceError('update todo status is blocked', 424); // update todo status is blocked
                 }
             }
 
-            if(!ToDosHelper::checkExistParentTodo($request, $this->db)) {
-              return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owner
-            } 
-            if(!ToDosHelper::checkTodoOwner($request, $this->db)){
-              return Controller::ApiResponceError('another owner of todo', 423); // another owner of todo 
+            if (!ToDosHelper::checkExistParentTodo($request, $this->db)) {
+                return Controller::ApiResponceError('parent todo not found', 404); // parent todo has another owner
+            }
+            if (!ToDosHelper::checkTodoOwner($request, $this->db)) {
+                return Controller::ApiResponceError('another owner of todo', 423); // another owner of todo 
             }
 
             $this->todo = $this->db->update($this->requestData, $this->requestData["id"]);
-            if(!empty($this->todo)){
+            if (!empty($this->todo)) {
                 return Controller::ApiResponceSuccess([
                     "message" => "todo updated",
                     "data" => $this->todo
-                ], 200);  
-            }else{
-                return Controller::ApiResponceError('updating todo problem', 500); 
+                ], 200);
+            } else {
+                return Controller::ApiResponceError('updating todo problem', 500);
             }
         }
     }
