@@ -10,6 +10,7 @@ use App\Helpers\API\ToDosHelper;
 use App\Http\Requests\API\ToDos\ToDoCreateRequest;
 use App\Http\Requests\API\ToDos\ToDosGetRequest;
 use App\Http\Requests\API\ToDos\ToDoUpdateRequest;
+use App\Http\Requests\API\ToDos\ToDoDeleteRequest;
 use Illuminate\Support\Carbon;
 
 class ToDosController extends Controller
@@ -90,16 +91,15 @@ class ToDosController extends Controller
             $this->requestData = ToDosHelper::getRequestData($request);
 
             if (intval($this->requestData["id_status"]) != 0) {
-                $statusName = ToDosHelper::getStatusName($request, $this->db);
-                $updateAllow = false;
+                $statusName = ToDosHelper::getStatusName($this->requestData, $this->db);
                 if ($statusName == 'done') {
                     $checkChildsStatuseDifferense = ToDosHelper::checkUpdatePossibility($this->requestData, $this->db);
                     if (!empty($checkChildsStatuseDifferense)) {
                         return Controller::ApiResponceError('update todo status is blocked', 424); // update todo status is blocked
-                    }else{
+                    } else {
                         $this->requestData["completed_at"] = Carbon::now();
                     }
-                }else{
+                } else {
                     $this->requestData["completed_at"] = null;
                 }
             }
@@ -119,6 +119,32 @@ class ToDosController extends Controller
                 ], 200);
             } else {
                 return Controller::ApiResponceError('updating todo problem', 500);
+            }
+        }
+    }
+
+    public function deleteToDo(ToDoDeleteRequest $request): JsonResponse
+    {
+        $this->requestValidateError = ToDosHelper::requestValidationErrorsData($request);
+
+        if ($this->requestValidateError) {
+            return Controller::ApiResponceError($this->requestValidateError, 500); // no valid input data
+        } else {
+            $this->requestData = ToDosHelper::getRequestData($request);
+            if (!ToDosHelper::checkTodoOwner($request, $this->db)) {
+                return Controller::ApiResponceError('another owner of todo', 423); // another owner of todo 
+            }
+            $checkToDoDeleteDisable = ToDosHelper::checkToDoDeleteDisable($request, $this->db);
+            if ($checkToDoDeleteDisable) {
+                return Controller::ApiResponceError($checkToDoDeleteDisable, 423); // another owner of todo 
+            } else {
+                $deleting = $this->db->delete($this->requestData["id"]);
+                if ($deleting) {
+                    return Controller::ApiResponceSuccess([
+                        "message" => "todo deleted",
+                        "data" => []
+                    ], 200);
+                }
             }
         }
     }

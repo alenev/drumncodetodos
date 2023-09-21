@@ -22,3 +22,4 @@ Route::get('todos/statuses/get', '\App\Http\Controllers\Api\ToDosStatusesControl
 Route::post('todos/create', '\App\Http\Controllers\Api\ToDosController@createToDo');
 Route::get('todos/get', '\App\Http\Controllers\Api\ToDosController@getToDos');
 Route::post('todos/update', '\App\Http\Controllers\Api\ToDosController@updateToDo');
+Route::post('todos/delete', '\App\Http\Controllers\Api\ToDosController@deleteToDo');

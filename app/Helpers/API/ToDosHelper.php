@@ -67,9 +67,23 @@ class ToDosHelper
         return true;
     }
 
-    public static function getStatusName(object $request, object $db)
-    {
+    public static function checkToDoDeleteDisable(object $request, object $db){
         $requestData = self::getRequestData($request);
+        $todo = $db->find($requestData['id'])->first();
+        if (intval($todo["id_user"]) != intval($requestData['id_user'])) {
+           return 'this todo has another owner';
+        }
+        $statusNameData = $requestData;
+        $statusNameData["id_status"] = $todo["id_status"];
+        $statusName = self::getStatusName($statusNameData, $db);
+        if ($statusName == 'done') {
+            return 'this todo has complete status';
+        }
+        return false;
+    }
+
+    public static function getStatusName(array $requestData, object $db)
+    {
         $toDosStatuses = new ToDosStatuses;
         $status = $toDosStatuses->find($requestData["id_status"])->first();
         if ($status) {
