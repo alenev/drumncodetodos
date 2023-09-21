@@ -23,6 +23,7 @@ class ToDosRepository implements ToDosRepositoryInterface
     $this->search = ToDos::query();
 
     $this->search->where('id_user', $params["id_user"]);
+   
 
     if (array_key_exists('search_keywords', $params) && !empty($params["search_keywords"])) {
       $this->search
@@ -37,9 +38,8 @@ class ToDosRepository implements ToDosRepositoryInterface
     if (array_key_exists('id_status', $params) && !empty($params["id_status"]) && $params["id_status"] > 0) {
       $this->search->where('id_status', '=', $params['id_status']);
     }
-
+  
     $dbToDos = $this->search->orderBy('id')->get();
-    //return $dbToDos;
     $childsTree = ToDosHelper::buildParentChildTree($dbToDos->toArray());
     return $childsTree;
 

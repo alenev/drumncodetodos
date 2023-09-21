@@ -2,14 +2,13 @@
 
 namespace App\Helpers\API;
 
+use App\Repositories\ToDosRepository;
 use App\Models\ToDosStatuses;
 
 class ToDosHelper
 {
 
-    private $childsData;
-
-    public static function requestValidationErrorsData($request)
+    public static function requestValidationErrorsData(object $request)
     {
         if (isset($request->validator) && $request->validator->fails()) {
 
@@ -26,7 +25,7 @@ class ToDosHelper
         }
     }
 
-    public static function getRequestData($request)
+    public static function getRequestData(object $request)
     {
         if (str_contains($request->header('Content-Type'), 'text/plain')) {
             return $request->json()->all();
@@ -35,7 +34,7 @@ class ToDosHelper
         }
     }
 
-    public static function checkExistParentTodo($request, $db)
+    public static function checkExistParentTodo(object $request, object $db)
     {
         $requestData = self::getRequestData($request);
         if (intval($requestData['id_parent_todo']) == 0) {
@@ -58,7 +57,7 @@ class ToDosHelper
         return true;
     }
 
-    public static function checkTodoOwner($request, $db)
+    public static function checkTodoOwner(object $request, object $db)
     {
         $requestData = self::getRequestData($request);
         $todo = $db->find($requestData['id'])->first();
@@ -68,7 +67,7 @@ class ToDosHelper
         return true;
     }
 
-    public static function getStatusName($request, $db)
+    public static function getStatusName(object $request, object $db)
     {
         $requestData = self::getRequestData($request);
         $toDosStatuses = new ToDosStatuses;
@@ -80,44 +79,91 @@ class ToDosHelper
         }
     }
 
-    public static function ChildTreeInsert($tree, $child)
+    public static function ChildTreeInsert(array $tree, array $child)
     {
         $insert = false;
         foreach ($tree as $key => &$node) {
             $insertNode = false;
-            if (intval($node["id"]) == intval($child["id_parent_todo"])) {
+            if ($node["id"] === $child["id_parent_todo"]) {
                 $node["childs"][] = $child;
                 $insert = true;
                 return $tree;
             }
             if (isset($node["childs"]) && is_array($node["childs"]) && !empty($node["childs"])) {
-                $ToDosHelper = new ToDosHelper();
-                $sub = $ToDosHelper->ChildTreeInsert($node["childs"], $child);
+                $sub = self::ChildTreeInsert($node["childs"], $child);
                 if ($sub) {
                     $node["childs"] = $sub;
                     return $tree;
                 }
             }
+
         }
-        if(!$insert){
-            $tree[] = $child;
-            return $tree;
-        }
+
+        return false;
     }
 
     public static function buildParentChildTree(array $dataset)
     {
-        $ToDosHelper = new ToDosHelper;
         $tree = [];
         foreach ($dataset as $key => $node) {
             $node['childs'] = [];
             if (empty($node['id_parent_todo']) || intval($node['id_parent_todo']) < 1) {
-                $tree[] = $node;    
+                $tree[] = $node;
             } else {
-                $tree = $ToDosHelper->ChildTreeInsert($tree, $node);
+                $tree = self::ChildTreeInsert($tree, $node);
             }
         }
         return $tree;
     }
-    
+
+    public static function checkUpdatePossibility(array $request, object $db)
+    {
+        $todos = $db->getAll(
+            array(
+                "id_user" => $request["id_user"]
+            )
+        );
+        $undonesChildTodos = self::checkChildsStatuses($todos, $request["id"], $request["id_status"]);
+        return $undonesChildTodos;
+    }
+
+    public static function checkChildsStatus(array $item, int $id_status)
+    {
+        if ($item["id_status"] != $id_status) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
+
+    public static function checkChildsStatuses(array $items, int $item_id, int $id_status, string $event = '', array $nodones = [])
+    {
+        foreach ($items as &$item) {
+            if ($event == '') {
+                if ($item["id"] === $item_id) {
+                    if (isset($item["childs"]) && !empty($item["childs"])) {
+                        return self::checkChildsStatuses($item["childs"], $item_id, $id_status, 'checkStatuses', $nodones);
+                    } else {
+                        return [];
+                    }
+                }
+            }
+            if ($event == 'checkStatuses') {
+
+                if (!self::checkChildsStatus($item, $id_status)) {
+                    $tmpItem = $item;
+                    unset($tmpItem['childs']);
+                    $nodones[] = $tmpItem;
+                }
+            }
+
+            if (isset($item["childs"]) && !empty($item["childs"])) {
+                $nodones = self::checkChildsStatuses($item["childs"], $item_id, $id_status, $event, $nodones);
+            }
+        }
+        return $nodones;
+    }
+
 }

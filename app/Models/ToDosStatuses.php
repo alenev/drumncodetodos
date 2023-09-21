@@ -21,6 +21,6 @@ class ToDosStatuses extends Model
     } 
 
     public function find($id){
-      return $this->find($id)->first();
+      return $this->where('id', $id)->get();
     }
 }

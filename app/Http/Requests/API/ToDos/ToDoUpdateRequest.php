@@ -41,8 +41,9 @@ class ToDoUpdateRequest extends FormRequest
             'id_user' => 'required|int|exists:users,id',
             'id_parent_todo' => 'required|int',
             'id_status' => 'required|int|exists:todos_statuses,id',
-            'priority' => 'required|int|between:1,5', 
-            'title' => 'required|string|min:1'
+            'priority' => 'required|int', 
+            'title' => 'required|string|min:1',
+            'is_complete' => 'int'
         ];
     }
 

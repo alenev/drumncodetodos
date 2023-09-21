@@ -10,6 +10,7 @@ use App\Helpers\API\ToDosHelper;
 use App\Http\Requests\API\ToDos\ToDoCreateRequest;
 use App\Http\Requests\API\ToDos\ToDosGetRequest;
 use App\Http\Requests\API\ToDos\ToDoUpdateRequest;
+use Illuminate\Support\Carbon;
 
 class ToDosController extends Controller
 {
@@ -90,13 +91,16 @@ class ToDosController extends Controller
 
             if (intval($this->requestData["id_status"]) != 0) {
                 $statusName = ToDosHelper::getStatusName($request, $this->db);
+                $updateAllow = false;
                 if ($statusName == 'done') {
-                    $childTodos = $this->db->getAllchildTodos($this->requestData["id_parent_todo"]);
-                    return Controller::ApiResponceSuccess([
-                        "message" => "todo updated",
-                        "data" => $childTodos
-                    ], 200);
-                    //  return Controller::ApiResponceError('update todo status is blocked', 424); // update todo status is blocked
+                    $checkChildsStatuseDifferense = ToDosHelper::checkUpdatePossibility($this->requestData, $this->db);
+                    if (!empty($checkChildsStatuseDifferense)) {
+                        return Controller::ApiResponceError('update todo status is blocked', 424); // update todo status is blocked
+                    }else{
+                        $this->requestData["completed_at"] = Carbon::now();
+                    }
+                }else{
+                    $this->requestData["completed_at"] = null;
                 }
             }
 
