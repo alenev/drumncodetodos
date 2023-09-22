@@ -41,28 +41,30 @@ API надає можливість:
 - Для відповідей точок API, як успішних, так й з помилками, реалізовані уніфіковані методи apiResponceSuccess й apiResponceError в класі базового контролера. Метод apiResponceError разом з кодом відповіді API надає текст помилки від валідатора request (Illuminate\Foundation\Http\FormRequest) 
 - В фільтрації виборки todo пошук в полях БД todo 'title' й 'description' реалізований через метод query()->whereFullText(). Це простий варіант для цього демо. В умовах розробки краще використовувати пакет Laravel Scout. 
 - З .gitignore виключений .env, щоб він знаходився в репозиторії для прикладу. Внизу .env є деякі додаткові параметри конфігу які використовуються і потрібні в ньому. Виключити його апдейти на хості можна через pipeline CI/CD.
+- В ToDosSeeder додане визначення у двох todo id_user=1 параметра id_parent_todo для формування тестової гілки дочірних todo 2-х рівнів вкладеності в тестових даних.
 
 ## Встановлення збірки:    
 1.
     ```sh
     composer install
     ```
-2. ```sh
+2.
+   ```sh
    php artisan migrate
    ```
-3.
+4. 
    ```sh
    php artisan db:seed --class=UsersSeeder
    ```
-4.
+5. Опційно у випадку потреби в базових даних todo для тестування
    ```sh
    php artisan db:seed --class=ToDosSeeder
    ```
-5.
+6.
     ```sh
     php artisan db:seed --class=ToDosStatusesSeeder
     ```
-6.
+7.
    ```sh
    php artisan serve
    ```
