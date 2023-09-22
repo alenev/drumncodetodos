@@ -130,6 +130,16 @@ class ToDosHelper
         return $tree;
     }
 
+    public static function sortingChildsTree(array $childsTree, string $sort_field, string $sort_order){
+        $key_values = array_column($childsTree, $sort_field); 
+        $sortD = SORT_ASC;
+        if($sort_order == 'desc'){
+            $sortD = SORT_DESC;
+        }
+        array_multisort($key_values, $sortD, $childsTree);
+        return $childsTree;
+    }
+
     public static function checkUpdatePossibility(array $request, object $db)
     {
         $todos = $db->getAll(

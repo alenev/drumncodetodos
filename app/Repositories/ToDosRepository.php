@@ -38,9 +38,18 @@ class ToDosRepository implements ToDosRepositoryInterface
     if (array_key_exists('id_status', $params) && !empty($params["id_status"]) && $params["id_status"] > 0) {
       $this->search->where('id_status', '=', $params['id_status']);
     }
-  
+
     $dbToDos = $this->search->orderBy('id')->get();
     $childsTree = ToDosHelper::buildParentChildTree($dbToDos->toArray());
+    $sort_field = ['created_at', 'completed_at', 'priority'];
+    $sort_order = ['asc', 'desc'];
+
+    if (array_key_exists('sort_field', $params) && !empty($params["sort_field"] && in_array($params["sort_field"], $sort_field))
+      && array_key_exists('sort_order', $params) && !empty($params["sort_order"] && in_array($params["sort_order"], $sort_order))
+    ) {
+     $childsTree = ToDosHelper::sortingChildsTree($childsTree, $params["sort_field"], $params["sort_order"]);
+    }
+   
     return $childsTree;
 
   }

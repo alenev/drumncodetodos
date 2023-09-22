@@ -11,6 +11,7 @@ class ToDos extends Model
     use HasFactory;
 
     protected $table = 'todos';
+
     protected $fillable = [
         'id_user',
         'id_parent_todo',
@@ -21,6 +22,10 @@ class ToDos extends Model
         'completed_at'
     ];
 
+    protected function serializeDate($date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
     public function parent()
     {
         return $this->belongsTo(ToDos::class, 'id_parent_todo');
@@ -40,9 +45,9 @@ class ToDos extends Model
     public function childs($id)
     {
         $todo = ToDos::find($id);
-        if($todo){
-        return $todo->descendants;
-        }else{
+        if ($todo) {
+            return $todo->descendants;
+        } else {
             return 0;
         }
     }
